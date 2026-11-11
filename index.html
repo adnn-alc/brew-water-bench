@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Coffee water reference: what each mineral does, published recipes on a GH/KH map, and a mixer for your own mineral concentrates.">
+<style>:root{color-scheme:light}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Brew Water Bench</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a lab bench. Map + mixer up top as the working surface, reference shelves below.
+   Ion colors come from flame tests and the elements themselves: Na amber, K lilac, Ca brick, Mg white-blue. */
+:root{
+  --bg:#edf2f3; --surface:#f8fbfb; --sunk:#e1e9eb; --line:#c5d2d6; --fg:#12242b; --muted:#506870;
+  --accent:#0b6e83; --accent-fg:#ffffff; --zone:#0b6e8322;
+  --mg:#3d7fa6; --ca:#b4532f; --na:#a56a00; --k:#7d55b0; --hco3:#1f7f63; --cl:#6c7d12; --so4:#96790a;
+  --good:#1f7f63; --warn:#a56a00; --bad:#b03a3a;
+  --f-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0d171b; --surface:#142228; --sunk:#0a1215; --line:#2a3d45; --fg:#e2edef; --muted:#93aab1;
+  --accent:#5cc3d6; --accent-fg:#06222a; --zone:#5cc3d626;
+  --mg:#8cc4e6; --ca:#e98a66; --na:#e6ad3c; --k:#b999e6; --hco3:#5fcaa6; --cl:#b5c94c; --so4:#dcc04a;
+  --good:#5fcaa6; --warn:#e6ad3c; --bad:#ef8080; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0d171b; --surface:#142228; --sunk:#0a1215; --line:#2a3d45; --fg:#e2edef; --muted:#93aab1;
+  --accent:#5cc3d6; --accent-fg:#06222a; --zone:#5cc3d626;
+  --mg:#8cc4e6; --ca:#e98a66; --na:#e6ad3c; --k:#b999e6; --hco3:#5fcaa6; --cl:#b5c94c; --so4:#dcc04a;
+  --good:#5fcaa6; --warn:#e6ad3c; --bad:#ef8080; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:clamp(2.1rem,5.5vw,3.5rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+.lede{max-width:62ch;color:var(--muted);font-size:1.05rem}
+.prose{display:flex;flex-direction:column;gap:.8rem;max-width:68ch}
+.label{font:500 .72rem/1.2 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+sub,sup{font-size:.7em;line-height:0}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:1.1rem;overflow-x:auto;padding-block:.6rem;scrollbar-width:none}
+nav a{font:500 .8rem var(--f-mono);color:var(--muted);text-decoration:none;white-space:nowrap}
+nav a:hover{color:var(--fg)}
+nav .brand{color:var(--fg);font-weight:600}
+
+header.hero{padding-block:2.6rem 1.6rem}
+header.hero .wrap{display:flex;flex-direction:column;gap:1rem}
+section{padding-block:2.4rem;border-top:1px solid var(--line)}
+section>.wrap{display:flex;flex-direction:column;gap:1.3rem}
+.sec-head{display:flex;flex-direction:column;gap:.5rem}
+
+.bench{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+@media (max-width:860px){.bench{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+
+svg text{font-family:var(--f-mono);fill:var(--muted);font-size:11px}
+#map{width:100%;height:auto;display:block;cursor:crosshair;touch-action:manipulation}
+.dot{cursor:pointer}
+.sel-card{background:var(--sunk);border-radius:4px;padding:.75rem .85rem;display:flex;flex-direction:column;gap:.35rem;font-size:.92rem}
+.sel-card .who{color:var(--muted);font-size:.85rem}
+.legend{display:flex;gap:.9rem;flex-wrap:wrap;font:.75rem var(--f-mono);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:.35rem;vertical-align:-1px}
+
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.field{display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.field.wide{grid-column:1/-1}
+input[type=number]{width:100%;font:500 1rem var(--f-mono);padding:.45rem .55rem;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.out{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.out-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.6rem;padding:.5rem .7rem;align-items:baseline;border-top:1px solid var(--line)}
+.out-row:first-child{border-top:0}
+.out-row b{font:600 1.15rem var(--f-mono);font-variant-numeric:tabular-nums}
+.out-row small{color:var(--muted);display:block;font-size:.78rem}
+.sw{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;margin-right:.4rem}
+.ions{display:flex;flex-wrap:wrap;gap:.4rem}
+.ion-chip{font:500 .8rem var(--f-mono);padding:.2rem .5rem;border:1px solid var(--line);border-radius:99px;font-variant-numeric:tabular-nums}
+.verdicts{display:flex;flex-direction:column;gap:.35rem;font-size:.9rem}
+.verdicts div{padding-left:.7rem;border-left:3px solid var(--line)}
+.verdicts .good{border-color:var(--good)} .verdicts .warn{border-color:var(--warn)} .verdicts .bad{border-color:var(--bad)}
+details{border-top:1px solid var(--line);padding-top:.7rem}
+summary{cursor:pointer;font:500 .8rem var(--f-mono);color:var(--muted)}
+details .fields{margin-top:.7rem;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:480px){details .fields{grid-template-columns:minmax(0,1fr)}}
+
+.tiles{display:grid;gap:.8rem}
+.tiles.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tiles.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:920px){.tiles.c4,.tiles.c3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:540px){.tiles.c4,.tiles.c3{grid-template-columns:minmax(0,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:4px;padding:.9rem;display:flex;flex-direction:column;gap:.55rem;font-size:.9rem}
+.tile .sym{font:700 2rem/1 var(--f-display);color:var(--c)}
+.tile .top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.tile .top span{font:.72rem var(--f-mono);color:var(--muted);text-align:right}
+.tile dl{margin:0;display:flex;flex-direction:column;gap:.45rem}
+.tile dt{font:500 .68rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile dd{margin:0}
+
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem}
+@media (max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+.note{background:var(--sunk);border-radius:4px;padding:.9rem 1rem;font-size:.93rem;display:flex;flex-direction:column;gap:.5rem}
+.eq{font:500 .9rem var(--f-mono);overflow-x:auto;white-space:nowrap;padding:.5rem .7rem;background:var(--sunk);border-radius:4px}
+
+.chips{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font:500 .8rem var(--f-mono);padding:.35rem .7rem;border:1px solid var(--line);border-radius:99px;background:transparent;color:var(--fg);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.recipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.8rem}
+.rc{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.85rem;display:flex;flex-direction:column;gap:.5rem;font-size:.88rem}
+.rc .gk{display:flex;gap:.3rem .8rem;flex-wrap:wrap;font-family:var(--f-mono)}
+.rc .gk b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.rc .gk span{display:block;font-size:.66rem;letter-spacing:.08em;color:var(--muted)}
+.rc .how{font:.78rem/1.45 var(--f-mono);color:var(--muted)}
+.rc .tags{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:auto}
+.tag{font:500 .66rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:.12rem .4rem;border-radius:3px;background:var(--sunk);color:var(--muted)}
+.tag.safe{color:var(--good)} .tag.cl{color:var(--warn)}
+.btn{font:600 .8rem var(--f-mono);padding:.4rem .7rem;border-radius:4px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;align-self:flex-start}
+.btn:hover{background:var(--accent);color:var(--accent-fg)}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:680px}
+th{font:500 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:.65rem .75rem;border-top:1px solid var(--line);vertical-align:top}
+tr:first-child td{border-top:0}
+td.num{white-space:nowrap}
+.ev{font:500 .66rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.ev.a{color:var(--good)} .ev.b{color:var(--warn)} .ev.c{color:var(--muted)}
+ol.steps{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:.4rem}
+ul.plain{margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:.4rem}
+.sources{columns:2 320px;column-gap:2rem;font-size:.86rem;padding-left:1.1rem;margin:0}
+.sources li{break-inside:avoid;margin-bottom:.45rem}
+footer{padding-block:1.5rem 3rem;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line)}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+section,header,#builder{scroll-margin-top:3rem}
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;counter-reset:st}
+@media (max-width:760px){.steps3{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1rem;display:flex;flex-direction:column;gap:.55rem;font-size:.93rem;counter-increment:st}
+.step h3::before{content:counter(st) ". ";color:var(--accent)}
+.step .acts{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:auto}
+.tastebox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;background:var(--sunk);border-radius:4px;padding:.7rem}
+@media (max-width:480px){.tastebox{grid-template-columns:minmax(0,1fr)}}
+.ends{display:flex;justify-content:space-between;font:.7rem var(--f-mono);color:var(--muted)}
+.meter{font-size:.92rem;padding:.55rem .7rem;border:1px dashed var(--line);border-radius:4px}
+.meter b{font-size:1.1rem}
+.meter span{color:var(--muted);font-size:.8rem}
+select{width:100%;font:500 .95rem var(--f-body);padding:.5rem .55rem;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px}
+#kit{display:flex;flex-direction:column;gap:.5rem}
+.kit-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto 5.2rem;gap:.6rem;align-items:center;font-size:.9rem}
+.kit-row small{display:block;color:var(--muted);font:.72rem var(--f-mono)}
+.kit-row input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--accent)}
+.kit-row select{width:auto;font-size:.8rem;padding:.3rem}
+.fields.b3{grid-template-columns:2fr 1fr 1fr}
+@media (max-width:560px){.fields.b3{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top">Brew Water Bench</a>
+  <a href="#start">Start</a><a href="#bench">Map + mixer</a><a href="#minerals">Minerals</a><a href="#together">How it fits</a><a href="#recipes">Recipes</a><a href="#pairing">By coffee</a><a href="#machine">Espresso machine</a><a href="#taste">Dial in by taste</a><a href="#products">Products</a><a href="#sources">Sources</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <span class="label">Water for coffee, in ppm as CaCO<sub>3</sub></span>
+  <h1>Two numbers run your cup: hardness pulls flavor out, alkalinity mutes acid.</h1>
+  <p class="lede">A working reference for building coffee water from distilled or RO: what each mineral does, published recipes on one map, and a mixer that works with whichever mineral bottles you own. Where the evidence is thin or people disagree, it says so.</p>
+</div></header>
+
+<section id="start"><div class="wrap">
+  <div class="sec-head">
+    <h2>Start here</h2>
+    <p class="lede">New to this? Two bottles and one side-by-side tasting teach more than any chart. All you need is distilled or ZeroWater, Epsom salt, baking soda and a 0.01 g scale.</p>
+  </div>
+  <div class="steps3">
+    <div class="step">
+      <h3>Make two concentrates</h3>
+      <p>Dissolve 6 g of Epsom salt in distilled water and top up to 600 mL. Do the same with 6 g of baking soda in a second bottle. Each is now 10 g per litre. Keep the baking soda bottle in the fridge.</p>
+      <div class="acts"><a class="btn" href="#builder" style="text-decoration:none">Check another bottle size</a></div>
+    </div>
+    <div class="step">
+      <h3>Mix a litre of 80 / 40</h3>
+      <p>Weigh 19.7 g from the Epsom bottle and 6.7 g from the baking soda bottle, then top up to 1 kg with distilled water. Hardness 80 does the extracting. Alkalinity 40 keeps the acidity in check.</p>
+      <div class="acts"><button class="btn" data-go="bh">Load 80 / 40</button></div>
+    </div>
+    <div class="step">
+      <h3>Change one number and taste</h3>
+      <p>Brew the same coffee with this water and with plain distilled. Then move only the alkalinity: 25 should taste brighter, 55 rounder. When that difference is clear to you, do the same with hardness.</p>
+      <div class="acts"><button class="btn" data-kh="25">Try KH 25</button><button class="btn" data-kh="55">Try KH 55</button></div>
+    </div>
+  </div>
+  <div class="note" style="flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between">
+    <p style="max-width:60ch"><b>Filling an espresso machine?</b> Skip the steps above and use rpavlis: potassium bicarbonate and nothing else, so there is nothing to scale or corrode.</p>
+    <button class="btn" data-go="rpavlis">Load rpavlis</button>
+  </div>
+</div></section>
+
+<section id="bench"><div class="wrap">
+  <div class="sec-head">
+    <h2>The map and the mixer</h2>
+    <p class="lede">Every recipe is a point: alkalinity (KH) across, total hardness (GH) up. Click a dot to load it, or click anywhere on the map to set your own target. The mixer turns the target into grams of your concentrates.</p>
+  </div>
+  <div class="bench">
+    <div class="panel">
+      <div class="panel-head"><h3>GH / KH map</h3><span class="label">ppm as CaCO<sub>3</sub></span></div>
+      <svg id="map" viewBox="0 0 560 430" role="img" aria-label="Scatter chart of water recipes by alkalinity and hardness"></svg>
+      <div class="legend">
+        <span><i style="background:var(--accent)"></i>filter recipe</span>
+        <span><i style="background:var(--k)"></i>espresso / machine</span>
+        <span><i style="background:var(--zone);border:1px solid var(--accent);border-radius:2px"></i>SCA handbook zone</span>
+        <span>✛ your target</span>
+      </div>
+      <div class="sel-card" id="selcard"></div>
+    </div>
+
+    <div class="panel" id="mixer">
+      <div class="panel-head"><h3>Mixer</h3><span class="label" id="kit-lbl">your bottles</span></div>
+      <div class="tastebox">
+        <label class="field"><span class="label">Acidity</span><input type="range" id="in-tk" min="10" max="75" step="5" value="40"><span class="ends"><span>brighter</span><span>rounder</span></span></label>
+        <label class="field"><span class="label">Body</span><input type="range" id="in-tg" min="20" max="140" step="5" value="80"><span class="ends"><span>lighter</span><span>fuller</span></span></label>
+      </div>
+      <div class="fields">
+        <label class="field"><span class="label">Target GH</span><input type="number" id="in-gh" min="0" max="300" step="1" value="80"></label>
+        <label class="field"><span class="label">Target KH</span><input type="number" id="in-kh" min="0" max="300" step="1" value="40"></label>
+        <label class="field"><span class="label">Batch, litres</span><input type="number" id="in-vol" min="0.1" max="50" step="0.1" value="1"></label>
+        <label class="field" id="f-k"><span class="label">KH from potassium <span class="num" id="kshare-lbl">50%</span></span><input type="range" id="in-kshare" min="0" max="100" step="5" value="50"><span class="ends"><span>smoother</span><span>sharper</span></span></label>
+        <label class="field" id="f-ca"><span class="label">GH from calcium <span class="num" id="ca-lbl">0%</span></span><input type="range" id="in-ca" min="0" max="100" step="5" value="0"><span class="ends"><span>magnesium</span><span>calcium</span></span></label>
+        <label class="field" id="f-mgcl"><span class="label">Magnesium as chloride <span class="num" id="mgcl-lbl">0%</span></span><input type="range" id="in-mgcl" min="0" max="100" step="5" value="0"><span class="ends"><span>Epsom</span><span>MgCl₂</span></span></label>
+      </div>
+      <div class="out" id="out"></div>
+      <div><span class="label">What ends up in the water, mg/L</span><div class="ions" id="ions" style="margin-top:.4rem"></div></div>
+      <div class="meter" id="meter"></div>
+      <div class="verdicts" id="verdicts"></div>
+      <details open>
+        <summary>My bottles: tick what you have, strength in grams of salt per litre</summary>
+        <div class="fields">
+          <div id="kit" class="field wide"></div>
+                            </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:.6rem">Untick a bottle you do not have and the mixer works around it. Calcium and magnesium chloride are for filter water only. At the default strengths, in 1 L of brew water, 1 g of Epsom concentrate adds about 4 GH, 1 g of baking soda concentrate about 6 KH, and 1 g of potassium concentrate about 25 KH. rpavlis is 2 g of the potassium concentrate per litre. Barista Hustle's own strengths are 2.45 and 1.68 g/L.</p>
+      </details>
+    </div>
+  </div>
+  <div class="panel" id="builder">
+    <div class="panel-head"><h3>Concentrate builder</h3><span class="label">check a bottle before you make it</span></div>
+    <div class="fields b3">
+      <label class="field"><span class="label">Salt</span><select id="b-salt"></select></label>
+      <label class="field"><span class="label">Salt, grams</span><input type="number" id="b-g" min="0" step="0.1" value="6"></label>
+      <label class="field"><span class="label">Topped up to, mL</span><input type="number" id="b-ml" min="1" step="10" value="600"></label>
+    </div>
+    <div class="out" id="b-out"></div>
+    <div class="verdicts" id="b-note"></div>
+    <button class="btn" id="b-use">Use this strength in the mixer</button>
+  </div>
+</div></section>
+
+<section id="minerals"><div class="wrap">
+  <div class="sec-head">
+    <h2>What each mineral contributes</h2>
+    <p class="lede">A salt always brings two ions. Epsom salt is magnesium plus sulfate; baking soda is sodium plus bicarbonate. The positive ions do the extracting and shaping, and bicarbonate does the buffering.</p>
+  </div>
+  <span class="label">Cations: hardness and seasoning</span>
+  <div class="tiles c4" id="cations"></div>
+  <span class="label">Anions: what rides along</span>
+  <div class="tiles c3" id="anions"></div>
+  <div class="note">
+    <b>How solid is this?</b>
+    <p>The bicarbonate effect is the best supported: it neutralizes coffee acids, and tasters reliably find high-alkalinity water flat and chalky. The magnesium vs calcium story is weaker. Hendon's 2014 paper was a computer model of binding energies, not a tasting, and it found magnesium binds flavor compounds most strongly. But in Royal Coffee's blind tasting, tasters preferred a calcium water and three of five called the magnesium water flat, and Lance Hedrick's blind tests landed on calcium plus potassium. Jonathan Gagné notes there are no lab tests showing magnesium extracts different flavors. Treat the taste words on these tiles as tendencies people report, then trust your own cup.</p>
+  </div>
+</div></section>
+
+<section id="together"><div class="wrap">
+  <div class="sec-head"><h2>How it fits together</h2></div>
+  <div class="two">
+    <div class="prose">
+      <h3>GH: total hardness</h3>
+      <p>The sum of calcium and magnesium. These doubly charged ions are the ones that grab flavor compounds in the grounds. Too little and the cup is thin and tea-like. Too much and it turns heavy, muddy or bitter.</p>
+      <h3>KH: alkalinity</h3>
+      <p>The bicarbonate content, which is the water's capacity to neutralize acid. It has the bigger effect on taste. Too little and acidity reads sharp or sour; too much and the cup goes flat and chalky. Royal Coffee found water with alkalinity equal to hardness tasted flat, and about half as much alkalinity as hardness did better. That 2:1 ratio is also the rule of thumb from <i>Water for Coffee</i>.</p>
+      <h3>Why "ppm as CaCO<sub>3</sub>"</h3>
+      <p>Different ions weigh different amounts, so chemists convert everything to the weight of calcium carbonate that would do the same job. It lets you add calcium and magnesium on one scale. It also means 80 ppm GH is not 80 mg/L of magnesium: it is about 19 mg/L.</p>
+    </div>
+    <div class="prose">
+      <h3>Alkalinity hits filter much harder than espresso</h3>
+      <p>A pour-over uses around 16 g of water per gram of coffee and an espresso around 2. Each gram of coffee meets roughly seven times more buffer in a filter brew. That is why filter recipes sit at 25 to 40 KH while espresso recipes run 45 to 55 and Scott Rao has enjoyed espresso at 200 to 300.</p>
+      <h3>It is not linear</h3>
+      <p>Rao dosed the same coffee to 10, 30, 50 and 70 KH. The 10 and 70 cups stood out and the middle two did not. Expect surprises, and compare cups side by side instead of predicting.</p>
+      <h3>Minerals work after brewing too</h3>
+      <p>Rao (citing Samo Smrke) and Apax Lab both report that coffee tastes essentially the same whether the minerals go in before or after brewing. That makes testing cheap: brew once with distilled water and dose individual cups.</p>
+      <div class="note">
+        <b>Reference zones</b>
+        <p class="num" style="font-size:.86rem">SCA 2009 standard: calcium hardness 68 (17–85), alkalinity near 40, pH 6.5–7.5, sodium near 10 mg/L, TDS 150 (75–250).<br>SCA handbook 2018 zone: GH 50–175, KH 40–75.<br>La Marzocco machines: GH 70–100, KH 40–80, chloride under 30 mg/L, TDS 90–150, pH 6.5–8.</p>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="recipes"><div class="wrap">
+  <div class="sec-head">
+    <h2>Recipes</h2>
+    <p class="lede">All start from distilled or RO water. "Load" sends the recipe to the mixer. Each card says whether your ticked bottles can make it exactly. If one is missing, the mixer substitutes what you have, which keeps the GH and KH but will not taste identical.</p>
+  </div>
+  <div class="chips" id="rfilter"></div>
+  <div class="recipes" id="rlist"></div>
+</div></section>
+
+<section id="pairing"><div class="wrap">
+  <div class="sec-head">
+    <h2>Starting points by coffee</h2>
+    <p class="lede">Nobody has published controlled data matching water to origin. What exists is product guidance, a few blind tastings and practitioner habit. Each row says where it comes from.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Coffee</th><th>GH</th><th>KH</th><th>Lean on</th><th>Why</th><th>Basis</th></tr></thead>
+    <tbody id="pairs"></tbody>
+  </table></div>
+  <div class="note">
+    <b>Two findings that cut against the folklore</b>
+    <p>In Royal Coffee's double-blind round on a high-scoring Mexican coffee, plain distilled water took the highest total score, with an SCA-spec calcium water a hair behind. And on Ethiopian washed and natural lots at three roast levels, calcium water was preferred nearly everywhere; only on the light washed coffee did magnesium keep pace. High bicarbonate lost on everything except the darkest roasts.</p>
+  </div>
+</div></section>
+
+<section id="machine"><div class="wrap">
+  <div class="sec-head">
+    <h2>Water that goes inside an espresso machine</h2>
+    <p class="lede">A boiler cares about three things: scale, corrosion, and having enough ions for the level probe to sense water. Taste comes second.</p>
+  </div>
+  <div class="two">
+    <div class="prose">
+      <h3>Scale</h3>
+      <div class="eq">Ca²⁺ + 2 HCO₃⁻ → CaCO₃ ↓ + CO₂ + H₂O</div>
+      <p>Heat drives this reaction to the right, and limescale drops out on the hottest surfaces. It takes calcium and bicarbonate together. Magnesium carbonate is far more soluble, so magnesium with bicarbonate does not scale at normal recipe strengths. Remove calcium and the scale problem mostly disappears.</p>
+      <h3>Corrosion</h3>
+      <p>Chloride pits stainless steel, which is why La Marzocco caps it at 30 mg/L and why Apax and others say to keep chloride concentrates out of the machine. Sulfate is the milder concern and mostly discussed for copper. Water with almost no alkalinity is also corrosive: the SCA handbook puts the floor near 40 ppm KH at boiler temperatures.</p>
+    </div>
+    <div class="prose">
+      <h3>The rpavlis recipe</h3>
+      <p>Robert Pavlis, a chemistry professor on Home-Barista, proposed the simplest safe water: distilled water plus about 0.1 g/L potassium bicarbonate.</p>
+      <div class="note num" style="font-size:.86rem">
+        <span>0.1 g/L KHCO₃ → KH 50 · GH 0 · potassium 39 mg/L</span>
+        <span>No calcium or magnesium, so nothing to scale.</span>
+        <span>No chloride or sulfate, so nothing to pit.</span>
+        <span>50 ppm of buffer protects the metal and feeds the level probe.</span>
+      </div>
+      <p>Potassium is used over sodium because it tastes less salty at the same alkalinity. Your setup already follows this.</p>
+      <h3>Adding flavor without adding risk</h3>
+      <ul class="plain">
+        <li>Epsom salt on top of rpavlis: 0.1 g/L adds about 40 GH. Forum users run up to twice that without scale. It does add sulfate, which strict rpavlis avoids.</li>
+        <li>Or keep the tank on plain rpavlis and add hardness to the cup. Apax suggests 1 to 2 drops per 40 mL espresso; Lotus magnesium drops work the same way.</li>
+        <li>Bicarbonate stock solutions can grow bacteria. One coffee scientist advises keeping them only days; others report years without trouble. Refrigerate and remake if cloudy.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="taste"><div class="wrap">
+  <div class="sec-head">
+    <h2>Dial in by taste</h2>
+    <p class="lede">Change one number at a time, by a lot at first.</p>
+  </div>
+  <div class="two">
+    <div class="tablewrap"><table style="min-width:420px">
+      <thead><tr><th>The cup is</th><th>Try</th></tr></thead>
+      <tbody>
+        <tr><td>Sharp, sour, metallic</td><td>Raise KH by 15 to 20</td></tr>
+        <tr><td>Flat, dull, chalky</td><td>Lower KH; check it is no more than half of GH</td></tr>
+        <tr><td>Thin, weak, tea-like</td><td>Raise GH by 20 to 30</td></tr>
+        <tr><td>Muddy, heavy, drying</td><td>Lower GH; less magnesium if you have calcium</td></tr>
+        <tr><td>Bitter (dark roast, robusta)</td><td>Shift some KH to sodium; Rao finds sodium counteracts bitterness</td></tr>
+        <tr><td>Finish too sharp</td><td>Shift KH from potassium toward sodium</td></tr>
+        <tr><td>Salty or one-dimensional</td><td>Shift KH from sodium toward potassium</td></tr>
+      </tbody>
+    </table></div>
+    <div class="prose">
+      <h3>Rao's four-cup test</h3>
+      <ol class="steps">
+        <li>Brew 900 mL of coffee with distilled water. Combine pour-overs or do one big immersion brew.</li>
+        <li>Stir, then split into four 225 mL cups.</li>
+        <li>Dose each cup differently. With Lotus drops at this size, each Ca or Mg drop adds 20 ppm GH and each Na or K drop adds 10 ppm KH. With 10 g/L concentrates, 1.1 g of Epsom adds 20 ppm GH and 0.4 g of baking soda adds 10 ppm KH.</li>
+        <li>Stir and taste blind.</li>
+      </ol>
+      <p>Start with big gaps, such as 10, 50, 100 and 150 KH at a fixed hardness. You may not be able to tell 10 from 30. Narrow the range on the next round, then repeat for GH.</p>
+      <h3>Measuring</h3>
+      <p>A TDS pen measures how well the water conducts electricity and multiplies by about 0.5 to show "ppm". It cannot tell hardness from alkalinity, and its number is not the mg/L of minerals: an 80 / 40 water holds about 162 mg/L by weight but reads near 130. The mixer and every recipe card show the reading to expect, worked out from each ion's conductivity, good to roughly 10%. Use the pen as a batch check: ZeroWater should read 000 before you start, and the same recipe should land on the same number every time. Aquarium GH and KH drop-titration kits can. If you only buy one, measure KH. Weigh salts on a 0.01 g scale, and remember Epsom salt is about half crystal water by weight, which every figure here already accounts for.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="products"><div class="wrap">
+  <div class="sec-head">
+    <h2>What is in the bottles</h2>
+    <p class="lede">The commercial products are the same salts you already have, plus calcium and chlorides.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Product</th><th>Contains</th><th>Dose</th><th>Aimed at</th><th>In a machine?</th></tr></thead>
+    <tbody>
+      <tr><td><b>Lotus</b> Calcium</td><td>Calcium chloride</td><td class="num">1 drop / 450 mL = 10 GH<br>1 drop / L = 4.5 GH</td><td>Creamy, juicy texture; clarity at low doses</td><td>Chloride and scale: no</td></tr>
+      <tr><td><b>Lotus</b> Magnesium</td><td>Magnesium chloride</td><td class="num">same as calcium</td><td>Sweet, complex, more strength; muddy if overdone</td><td>Small doses only (4 drops/L is about 13 mg/L chloride)</td></tr>
+      <tr><td><b>Lotus</b> Sodium</td><td>Sodium bicarbonate</td><td class="num">1 drop / 450 mL = 5 KH<br>1 drop / L = 2.25 KH</td><td>Smooth finish, tames bitterness</td><td>Yes</td></tr>
+      <tr><td><b>Lotus</b> Potassium</td><td>Potassium bicarbonate</td><td class="num">same as sodium</td><td>Sharper, brighter finish</td><td>Yes (this is rpavlis in a dropper)</td></tr>
+      <tr><td><b>Apax</b> Tonik</td><td>Mg, Ca and Na chlorides; Na and K bicarbonates</td><td class="num">3–4 g/L ≈ 90–120 ppm<br>or 5–10 drops / 200 mL cup</td><td>Brightness and clarity. Washed, fruit-driven coffees</td><td>No (chlorides)</td></tr>
+      <tr><td><b>Apax</b> Jamm</td><td>Mg, Ca and K chlorides; K and Na bicarbonates</td><td class="num">same</td><td>Sweetness, body. Naturals, honeys, fermented lots, Brazil, Colombia, SE Asia</td><td>No (chlorides)</td></tr>
+      <tr><td><b>Apax</b> Lylac</td><td>Mg sulfate, Mg chloride, K and Na chlorides, K and Na bicarbonates. No calcium</td><td class="num">same</td><td>Florals, silky texture, clean finish. Ethiopia, Panama, Central America; Geisha, Sidra, Chiroso, Pink Bourbon</td><td>No (chlorides)</td></tr>
+      <tr><td><b>Third Wave Water</b> Light / Dark</td><td>Magnesium sulfate, calcium citrate, sodium chloride</td><td class="num">1 stick per gallon<br>TDS about 150</td><td>Filter. No bicarbonate; the citrate titrates as roughly 40 KH</td><td>No (calcium, chloride)</td></tr>
+      <tr><td><b>Third Wave Water</b> Medium / Espresso</td><td>Magnesium sulfate, calcium citrate, potassium bicarbonate</td><td class="num">1 stick per gallon</td><td>Espresso profile drops the chloride</td><td>Sold for it, but it carries calcium</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:.86rem;color:var(--muted);max-width:70ch">Apax blends are written Tonik/Jamm/Lylac in grams per litre, so 2/1/1 means 2 g Tonik, 1 g Jamm, 1 g Lylac. Overdosing Jamm flattens acidity and turns chalky; too much Lylac turns bitter or salty.</p>
+</div></section>
+
+<section id="sources"><div class="wrap">
+  <div class="sec-head"><h2>Sources</h2><p class="lede">Ion and gram figures are calculated from molar masses and checked against the published recipes. Taste claims belong to the sources named.</p></div>
+  <ol class="sources">
+    <li><a href="https://researchportal.bath.ac.uk/en/publications/the-role-of-dissolved-cations-in-coffee-extraction/">Hendon, Colonna-Dashwood &amp; Colonna-Dashwood, "The Role of Dissolved Cations in Coffee Extraction"</a>, J. Agric. Food Chem. 2014</li>
+    <li><a href="https://www.scottrao.com/blog/lotus-water-drops">Scott Rao, "Lotus Water Drops"</a>: drop values, Rao/Perger and Light &amp; Bright recipes, four-cup test</li>
+    <li><a href="https://thebasicbarista.com/blogs/topics/lotus-brewing-water-recipes">The Basic Barista, Lotus recipes</a>: Simple &amp; Sweet, espresso versions, per-mineral taste notes</li>
+    <li><a href="https://coffeeadastra.com/2018/12/16/water-for-coffee-extraction/">Jonathan Gagné, "Water for Coffee Extraction"</a>: recipe gram weights, SCA 2009 targets</li>
+    <li><a href="https://coffeeadastra.com/2019/08/23/a-tool-and-videos-for-crafting-custom-brew-water/">Jonathan Gagné, Brew Water Crafter</a></li>
+    <li><a href="https://www.baristahustle.com/blog/diy-water-recipes-redux/">Barista Hustle, "DIY Water Recipes Redux"</a> (paywalled; figures via <a href="https://kfchou.github.io/water-chemistry/">Kenny Chou's write-up</a> and Gagné)</li>
+    <li><a href="https://royalcoffee.com/treading-water-a-practical-h2o-guide-for-coffee-professionals-part-ii-the-sensory-data/">Chris Kornman, Royal Coffee, "Treading Water, Part II: The Sensory Data"</a></li>
+    <li><a href="https://www.home-barista.com/water/easiest-way-to-make-rpavlis-water-t64609-10.html">Home-Barista, "Easiest way to make rpavlis water?"</a> and <a href="https://www.home-barista.com/water/rpavlis-magnesium-epsom-salt-t101146.html">"Rpavlis + Magnesium"</a></li>
+    <li><a href="https://techcenter.lamarzocco.com/en/watercalculator">La Marzocco water calculator</a> and water specification sheet</li>
+    <li><a href="https://apaxlab.com/blogs/news/how-to-use-our-mineral-concentrates">Apax Lab, dosing</a>, <a href="https://apaxlab.com/blogs/news/when-to-use-jamm-2">when to use Jamm</a>, <a href="https://apaxlab.com/blogs/news/when-to-use-lylac-3">when to use Lylac</a>, <a href="https://apaxlab.com/blogs/news/apax-lab-recipes">recipes</a></li>
+    <li><a href="https://dailycoffeenews.com/2024/07/05/apax-lab-mineral-concentrates-are-ready-to-rock-your-coffee">Daily Coffee News on Apax Lab</a></li>
+    <li><a href="https://thirdwavewater.com/collections/all">Third Wave Water product pages</a></li>
+    <li>SCA Water Quality Handbook (2018) zone of GH 50–175 and KH 40–75 is quoted as widely cited; the handbook itself is not free to read.</li>
+  </ol>
+</div></section>
+
+<footer><div class="wrap">A prototype for review. Recipes and pairings are starting points, not prescriptions. Use food-grade salts.</div></footer>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- data ---------- */
+// gh/kh in ppm as CaCO3. k = share of KH from potassium (%). clGH = hardness supplied by chloride salts.
+const R=[
+ {id:'rpavlis',name:'rpavlis',by:'Robert Pavlis, Home-Barista',gh:0,kh:50,k:100,use:'espresso',safe:1,kit:1,clGH:0,
+  how:'0.1 g/L potassium bicarbonate',note:'The boiler-safe baseline. No scale, no chloride, no sulfate. Clean but adds nothing to extraction.'},
+ {id:'rpavlis-mg',name:'rpavlis + Epsom',by:'Home-Barista variant',gh:40,kh:50,k:100,use:'espresso',safe:1,kit:1,clGH:0,
+  how:'0.1 g/L KHCO₃ + 0.1 g/L Epsom salt',note:'Adds magnesium for more extraction and body without calcium. Brings some sulfate.'},
+ {id:'lb-esp',name:'Light & Bright, espresso',by:'Lance Hedrick / Lotus',gh:20,kh:45,k:100,mc:100,use:'espresso',safe:0,kit:1,clGH:18,
+  how:'Lotus per L: 4 Mg, 20 K',note:'Low hardness, potassium-only buffer for bright light-roast shots.'},
+ {id:'ss-esp',name:'Simple & Sweet, espresso',by:'Lotus',gh:20,kh:55,k:0,mc:100,use:'espresso',safe:0,kit:1,clGH:18,
+  how:'Lotus per L: 4 Mg, 24 Na',note:'Sodium buffer for a smoother, rounder finish.'},
+ {id:'lb',name:'Light & Bright',by:'Lance Hedrick / Lotus',gh:60,kh:25,k:100,ca:100,use:'filter',safe:0,kit:0,clGH:58.5,
+  how:'Lotus per L: 13 Ca, 11 K',note:'Calcium plus potassium won Hedrick\'s double-blind rounds for vibrant, fruity light roasts.'},
+ {id:'ss',name:'Simple & Sweet',by:'Lotus',gh:90,kh:40,k:39,ca:65,mc:100,use:'filter',safe:0,kit:0,clGH:90,
+  how:'Lotus per L: 13 Ca, 7 Mg, 7 K, 11 Na',note:'The all-rounder. Magnesium for body, sodium for a smooth finish.'},
+ {id:'raoperger',name:'Rao / Perger',by:'Dan Eils for Scott Rao',gh:90,kh:42,k:58,ca:30,mc:35,use:'filter',safe:0,kit:0,clGH:47,
+  how:'Per L: 0.10 g Epsom, 0.04 g MgCl₂·6H₂O, 0.03 g CaCl₂, 0.034 g NaHCO₃, 0.04 g KHCO₃',note:'Gagné\'s favorite in blind testing. About two parts magnesium to one part calcium.'},
+ {id:'eils',name:'Dan Eils',by:'via Scott Rao',gh:118,kh:50,k:100,ca:60,mc:100,use:'filter',safe:0,kit:0,clGH:118,
+  how:'Per L: 0.10 g MgCl₂·6H₂O, 0.076 g CaCl₂, 0.10 g KHCO₃',note:'All-chloride hardness with a potassium buffer. Gagné\'s second favorite.'},
+ {id:'melb',name:'Melbourne',by:'Barista Hustle',gh:24,kh:12,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'23.7 g Mg conc. + 11.5 g buffer per kg',note:'Approximates Melbourne tap water. Very soft; expect high, unbuffered acidity.'},
+ {id:'woc',name:'WOC Budapest',by:'Barista Hustle',gh:51,kh:40,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'51.2 g Mg conc. + 40.1 g buffer per kg',note:'Competition water from World of Coffee Budapest. Soft with a full buffer.'},
+ {id:'sca',name:'SCA optimum',by:'Barista Hustle, after SCA 2009',gh:69,kh:40,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'68.6 g Mg conc. + 40.1 g buffer per kg',note:'The classic 68 / 40 target, with magnesium in place of calcium.'},
+ {id:'bh',name:'Barista Hustle',by:'Barista Hustle / Matt Perger',gh:81,kh:40,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'80.7 g Mg conc. + 40.1 g buffer per kg',note:'A 2:1 hardness to alkalinity water. A sensible first recipe for an Epsom and baking soda kit.'},
+ {id:'rao08',name:'Rao 2008',by:'Barista Hustle, after Scott Rao',gh:76,kh:50,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'75.7 g Mg conc. + 50.1 g buffer per kg',note:'More buffer, rounder acidity.'},
+ {id:'hendon',name:'Hendon',by:'Barista Hustle, after Water for Coffee',gh:100,kh:31,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'99.9 g Mg conc. + 30.8 g buffer per kg',note:'High hardness, low buffer. Pushes extraction and leaves acidity loud.'},
+ {id:'hard',name:'Pretty Hard',by:'Barista Hustle',gh:126,kh:35,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'126.1 g Mg conc. + 35.1 g buffer per kg',note:'For feeling what too much hardness does.'},
+ {id:'hardaf',name:'Hard AF',by:'Barista Hustle',gh:177,kh:45,k:0,use:'filter',safe:1,kit:1,clGH:0,
+  how:'176.8 g Mg conc. + 45.2 g buffer per kg',note:'The top edge of the SCA zone. A teaching extreme.'}
+];
+
+const CAT=[
+ {sym:'Mg²⁺',name:'Magnesium',c:'--mg',from:'Epsom salt (sulfate), Lotus Mg (chloride)',does:'Counts toward GH. Binds flavor compounds most strongly in Hendon\'s model, especially fruit acids like citric.',taste:'Sweet, complex, more strength and body.',much:'Muddy, heavy, or flat.',mach:'Does not form limescale at recipe strengths.'},
+ {sym:'Ca²⁺',name:'Calcium',c:'--ca',from:'Calcium chloride, calcium citrate',does:'Counts toward GH. Extracts slightly less than magnesium in the model, yet often wins blind tastings.',taste:'Creamy, juicy texture; sweetness with clarity at lower doses.',much:'Bitterness and drying astringency.',mach:'The scale-former. Keep it out of boilers or keep it low.'},
+ {sym:'Na⁺',name:'Sodium',c:'--na',from:'Baking soda, table salt',does:'No hardness. Arrives with the buffer and seasons the cup.',taste:'Smooth, rounded finish. Counteracts bitterness and off flavors.',much:'One-dimensional, then salty. SCA suggests about 10 mg/L.',mach:'Harmless.'},
+ {sym:'K⁺',name:'Potassium',c:'--k',from:'Potassium bicarbonate',does:'No hardness. The other way to carry bicarbonate.',taste:'A sharper, brighter finish. Lotus calls it a dial on perceived acidity.',much:'Too intense on coffees with off flavors.',mach:'Harmless. The rpavlis choice.'}
+];
+const AN=[
+ {sym:'HCO₃⁻',name:'Bicarbonate',c:'--hco3',from:'Baking soda, potassium bicarbonate',does:'This is KH. Neutralizes coffee acids and releases CO₂.',taste:'Enough: rounded, balanced acidity.',much:'Flat, chalky, muted. The worst sweetness scores in Royal\'s tasting came from bicarbonate-only water.',mach:'Protective above about 40 ppm. Scales only when calcium is present.'},
+ {sym:'Cl⁻',name:'Chloride',c:'--cl',from:'Calcium and magnesium chloride, table salt',does:'Comes along with chloride salts. Not a deliberate flavor ingredient in most recipes.',taste:'Often credited with fuller mouthfeel, on weak evidence.',much:'La Marzocco reports more sourness and astringency above 30 mg/L.',mach:'Pits stainless steel. The main reason concentrates stay out of machines.'},
+ {sym:'SO₄²⁻',name:'Sulfate',c:'--so4',from:'Epsom salt',does:'Rides in with Epsom salt: 80 GH brings about 77 mg/L.',taste:'Apax builds Lylac on it for floral, silky cups. Gagné has seen little real evidence either way.',much:'Unknown at coffee levels.',mach:'Milder than chloride; mostly a copper concern.'}
+];
+
+const PAIRS=[
+ ['Washed Ethiopia, Geisha, floral lots','50–70','20–30','Calcium + potassium (Light & Bright), or Apax Lylac','Low buffer keeps florals and acidity loud; high alkalinity erases what you paid for','b','Lotus, Apax'],
+ ['Washed Kenya and other very high-acid coffees','60–90','30–45','More buffer than for Ethiopia; Apax Tonik','Enough KH to turn sharp into juicy, without flattening it','c','Inference from KH behavior; Apax'],
+ ['Washed Colombia, Central America','70–90','35–45','Rao / Perger or Simple & Sweet','Balanced all-rounder zone; Lylac for Pink Bourbon, Chiroso and Central American florals','b','Rao, Lotus, Apax'],
+ ['Naturals','70–90','30–45','Apax Jamm; a little sodium in the buffer','Sweetness and body; sodium smooths ferment notes. Keep KH moderate or naturals turn dull','b','Apax, Lotus'],
+ ['Anaerobic, yeast and other experimental ferments','70–90','35–50','Apax Jamm; sodium-leaning buffer','Jamm is pitched to smooth sharp or funky notes','b','Apax'],
+ ['Honey process','60–90','30–40','Jamm for weight or Lylac for elegance','Apax recommends both, depending on the goal','b','Apax'],
+ ['Brazil, Sumatra and other low-acid, chocolatey coffees','80–100','25–40','Jamm; do not over-buffer','There is little acidity to spare, so extra KH leaves the cup flat','c','Apax; inference'],
+ ['Dark roast, robusta','50–80','50–75','Sodium bicarbonate','High bicarbonate did better on dark roasts in Royal\'s tasting; sodium counteracts bitterness','a','Royal Coffee, Rao'],
+ ['Light-roast espresso','20–40','45–55','Potassium buffer, small magnesium dose','Espresso needs more buffer than filter; low hardness keeps it machine-friendly','b','Lotus / Hedrick, Rao'],
+ ['Milk drinks','80–100','50–60','About 2:1 GH to KH','Fuller extraction that still reads through milk','c','K. Chou, after Water for Coffee']
+];
+const EV={a:'blind tasting',b:'maker guidance',c:'rule of thumb'};
+
+/* ---------- chemistry ---------- */
+// ppm as CaCO3 delivered by 1 g of salt in 1 L
+const PPM={mg:405.9,na:595.7,k:499.9};
+// The bottles a person can own. on = ticked, s = strength in g of salt per litre of concentrate.
+const KIT=[
+ {id:'epsom',name:'Epsom salt',sub:'MgSO₄·7H₂O · hardness',ppm:405.9,on:1,s:10,c:'--mg'},
+ {id:'mgcl',name:'Magnesium chloride',sub:'MgCl₂·6H₂O · hardness',ppm:492.3,on:0,s:10,c:'--mg'},
+ {id:'cacl',name:'Calcium chloride',sub:'CaCl₂ · hardness',ppm:901.9,on:0,s:10,c:'--ca',form:'anh'},
+ {id:'soda',name:'Baking soda',sub:'NaHCO₃ · buffer',ppm:595.7,on:1,s:10,c:'--na'},
+ {id:'khco3',name:'Potassium bicarbonate',sub:'KHCO₃ · buffer',ppm:499.9,on:1,s:50,c:'--k'}
+];
+const K=id=>KIT.find(b=>b.id===id);
+const MIX={epsom:'epsom',soda:'soda',khco3:'khco3',cacl2:'cacl',cacl2h:'cacl',mgcl2:'mgcl'};
+function setForm(f){const b=K('cacl');b.form=f==='di'?'di':'anh';b.ppm=b.form==='di'?680.8:901.9}
+function missing(r){
+  const m=[],ca=r.ca||0,mc=r.mc||0;
+  if(r.gh>0){
+    if(ca>0&&!K('cacl').on)m.push('calcium chloride');
+    if(ca<100){if(mc>0&&!K('mgcl').on)m.push('magnesium chloride');if(mc<100&&!K('epsom').on)m.push('Epsom salt')}
+  }
+  if(r.kh>0){if(r.k>0&&!K('khco3').on)m.push('potassium bicarbonate');if(r.k<100&&!K('soda').on)m.push('baking soda')}
+  return m;
+}
+function kitLabel(){$('kit-lbl').textContent=KIT.filter(b=>b.on).length+' of '+KIT.length+' bottles'}
+function renderKit(){
+  $('kit').innerHTML=KIT.map(b=>`<div class="kit-row"><input type="checkbox" id="kit-on-${b.id}" ${b.on?'checked':''}><label for="kit-on-${b.id}"><b>${b.name}</b><small>${b.sub}</small></label>${b.id==='cacl'?`<select id="kit-form" aria-label="Calcium chloride form"><option value="anh"${b.form==='di'?'':' selected'}>anhydrous</option><option value="di"${b.form==='di'?' selected':''}>dihydrate</option></select>`:'<span></span>'}<input type="number" id="kit-s-${b.id}" min="0.1" step="0.1" value="${b.s}" aria-label="${b.name} strength, grams per litre"></div>`).join('');
+  kitLabel();
+}
+// Conductivity in µS/cm per ppm-as-CaCO3, from limiting ionic conductivities at 25 °C
+// (Mg 106, Ca 119, Na 50.1, K 73.5, HCO3 44.5, SO4 160, Cl 76.3 S·cm²/mol), trimmed 3–10% for real solutions.
+const EC={so4:2.392,cl:2.52,na:1.834,k:2.287};
+function pen(r){const kK=r.kh*r.k/100;return ((r.gh-r.clGH)*EC.so4+r.clGH*EC.cl+(r.kh-kK)*EC.na+kK*EC.k)/2}
+const SALTS=[
+ {id:'epsom',name:'Epsom salt (MgSO₄·7H₂O)',adds:'GH',ppm:405.9,sol:500,mix:'in-smg',ref:80},
+ {id:'soda',name:'Baking soda (NaHCO₃)',adds:'KH',ppm:595.7,sol:90,mix:'in-sna',ref:40},
+ {id:'khco3',name:'Potassium bicarbonate (KHCO₃)',adds:'KH',ppm:499.9,sol:220,mix:'in-sk',ref:50},
+ {id:'cacl2',name:'Calcium chloride, anhydrous (CaCl₂)',adds:'GH',ppm:901.9,sol:600,mix:null,ref:60},
+ {id:'cacl2h',name:'Calcium chloride dihydrate (CaCl₂·2H₂O)',adds:'GH',ppm:680.8,sol:700,mix:null,ref:60},
+ {id:'mgcl2',name:'Magnesium chloride hexahydrate (MgCl₂·6H₂O)',adds:'GH',ppm:492.3,sol:1000,mix:null,ref:60}
+];
+const state={gh:80,kh:40,k:50,vol:1,sel:'bh',filter:'all'};
+function load(){try{const s=JSON.parse(localStorage.getItem('bwb2')||'null');if(s)KIT.forEach(b=>{const o=s[b.id];if(o){b.on=o.on?1:0;if(o.s>0)b.s=o.s;if(b.id==='cacl')setForm(o.form)}})}catch(e){}}
+function save(){try{const o={};KIT.forEach(b=>{o[b.id]={on:b.on,s:b.s,form:b.form}});localStorage.setItem('bwb2',JSON.stringify(o))}catch(e){}}
+const n=(v,d=1)=>(Math.round(v*10**d)/10**d).toFixed(d);
+
+function calc(){
+  const gh=Math.max(0,+$('in-gh').value||0), kh=Math.max(0,+$('in-kh').value||0);
+  const vol=Math.max(0.1,+$('in-vol').value||1), ks=+$('in-kshare').value/100;
+  const has=id=>K(id).on;
+  const hasH=has('epsom')||has('mgcl')||has('cacl'), hasB=has('soda')||has('khco3');
+  const ksh=has('khco3')?(has('soda')?ks:1):0;
+  const cash=has('cacl')?((has('epsom')||has('mgcl'))?+$('in-ca').value/100:1):0;
+  const clsh=has('mgcl')?(has('epsom')?+$('in-mgcl').value/100:1):0;
+  const ghE=hasH?gh:0, khE=hasB?kh:0;
+  const ghCa=ghE*cash, ghMg=ghE-ghCa, ghMgCl=ghMg*clsh, ghMgS=ghMg-ghMgCl;
+  state.gh=gh;state.kh=kh;state.k=ks*100;state.vol=vol;
+  const khK=khE*ksh, khNa=khE-khK;
+  const amt={epsom:ghMgS,mgcl:ghMgCl,cacl:ghCa,soda:khNa,khco3:khK}, conc={}, dry={};
+  let used=0;
+  KIT.forEach(b=>{dry[b.id]=amt[b.id]/b.ppm*vol;conc[b.id]=b.on&&b.s>0?amt[b.id]/(b.s*b.ppm)*1000*vol:0;used+=conc[b.id]});
+  const water=vol*1000-used;
+  const drops=`Ca ${Math.round(ghCa/4.5)} · Mg ${Math.round(ghMg/4.5)} · Na ${Math.round(khNa/2.25)} · K ${Math.round(khK/2.25)}`;
+  const ion={Mg:ghMg*0.2428,Ca:ghCa*0.4004,SO4:ghMgS*0.9598,Cl:(ghCa+ghMgCl)*0.7084,Na:khNa*0.4594,K:khK*0.7813,HCO3:khE*1.2192};
+  const tds=ion.Mg+ion.Ca+ion.SO4+ion.Cl+ion.Na+ion.K+ion.HCO3;
+  const ec=ghMgS*EC.so4+ghMgCl*2.455+ghCa*2.578+khNa*EC.na+khK*EC.k;
+  $('ca-lbl').textContent=$('in-ca').value+'%'; $('mgcl-lbl').textContent=$('in-mgcl').value+'%';
+  $('f-k').hidden=!(has('soda')&&has('khco3')); $('f-ca').hidden=!(has('cacl')&&(has('epsom')||has('mgcl'))); $('f-mgcl').hidden=!(has('epsom')&&has('mgcl'));
+  $('in-tk').value=Math.min(75,Math.max(10,kh)); $('in-tg').value=Math.min(140,Math.max(20,gh));
+  $('meter').innerHTML=`A TDS pen should read <b class="num">≈ ${n(ec/2,0)} ppm</b> <span>(conductivity ≈ ${n(ec,0)} µS/cm, give or take 10%)</span><br><span>Same water in Lotus drops per litre: ${drops}</span>`;
+  $('kshare-lbl').textContent=Math.round(ks*100)+'%';
+
+  const row=(c,label,sub,val)=>`<div class="out-row"><div><span class="sw" style="background:var(${c})"></span>${label}<small>${sub}</small></div><b>${val}</b></div>`;
+  $('out').innerHTML=
+    KIT.filter(b=>b.on).map(b=>row(b.c,b.name+' concentrate',`${n(dry[b.id]*1000,0)} mg of dry salt · bottle at ${b.s} g/L`,n(conc[b.id])+' g')).join('')+
+    row('--line','Distilled or RO water',water<0?'Concentrates are too weak for this target':'Top up to '+n(vol*1000,0)+' g total',n(Math.max(0,water),0)+' g');
+
+  const chip=(c,l,v)=>`<span class="ion-chip" style="border-color:var(${c})">${l} ${n(v,0)}</span>`;
+  $('ions').innerHTML=chip('--mg','Mg',ion.Mg)+chip('--ca','Ca',ion.Ca)+chip('--so4','SO₄',ion.SO4)+chip('--na','Na',ion.Na)+chip('--k','K',ion.K)+chip('--hco3','HCO₃',ion.HCO3)+chip('--cl','Cl',ion.Cl)+`<span class="ion-chip">by weight ${n(tds,0)}</span>`;
+
+  const v=[];
+  const ratio=kh>0?gh/kh:null;
+  if(gh<30)v.push(['warn','Hardness under 30: light, tea-like extraction. Fine inside a machine, thin for filter.']);
+  else if(gh<=100)v.push(['good','Hardness '+n(gh,0)+': the range most filter recipes live in.']);
+  else if(gh<=175)v.push(['warn','Hardness over 100: heavier body, rising risk of muddy or bitter cups.']);
+  else v.push(['bad','Hardness over 175 is outside every published zone.']);
+  if(kh<20)v.push(['warn','Alkalinity under 20: acidity will be sharp. Too little buffer for a boiler.']);
+  else if(kh<40)v.push(['good','Alkalinity '+n(kh,0)+': bright filter territory. Below the 40 ppm boiler floor.']);
+  else if(kh<=75)v.push(['good','Alkalinity '+n(kh,0)+': rounded acidity, suits espresso and is enough buffer for a boiler.']);
+  else v.push(['warn','Alkalinity over 75: expect flat, chalky filter coffee. Dark roasts and espresso tolerate it.']);
+  if(ratio!==null&&gh>0){ if(ratio<1.3)v.push(['warn','GH:KH is '+n(ratio)+':1. Near 1:1 tasted flat in Royal\'s test; 2:1 did better.']); else v.push(['good','GH:KH is '+n(ratio)+':1.']); }
+  if(ion.Na>30)v.push(['warn','Sodium is '+n(ion.Na,0)+' mg/L, well above the SCA\'s 10. Shift buffer to potassium if it tastes salty.']);
+  if(!hasH&&gh>0)v.push(['bad','No hardness bottle is ticked, so GH stays at 0.']);
+  if(!hasB&&kh>0)v.push(['bad','No buffer bottle is ticked, so KH stays at 0.']);
+  if(ion.Ca>0)v.push(['warn','Calcium '+n(ion.Ca,0)+' mg/L: with bicarbonate it forms limescale when heated. Filter water only.']);
+  if(ion.Cl>30)v.push(['bad','Chloride '+n(ion.Cl,0)+' mg/L is over La Marzocco\'s 30 mg/L limit. Keep this out of an espresso machine.']);
+  else if(ion.Cl>0)v.push(['warn','Chloride '+n(ion.Cl,0)+' mg/L: under the 30 mg/L machine limit, but chloride-free is safer in a boiler.']);
+  if(!ion.Ca&&!ion.Cl)v.push(['good','No calcium and no chloride, so no limescale and nothing to pit steel'+(ion.SO4>0?'. Sulfate is '+n(ion.SO4,0)+' mg/L.':'.')]);
+  $('verdicts').innerHTML=v.map(x=>`<div class="${x[0]}">${x[1]}</div>`).join('');
+  drawMap();
+}
+
+/* ---------- map ---------- */
+const W=560,H=430,ml=46,mr=14,mt=14,mb=40,pw=W-ml-mr,ph=H-mt-mb,XM=100,YM=190;
+const X=kh=>ml+Math.min(kh,XM)/XM*pw, Y=gh=>mt+ph-Math.min(gh,YM)/YM*ph;
+function drawMap(){
+  let s='';
+  for(let k=0;k<=100;k+=20){s+=`<line x1="${X(k)}" y1="${mt}" x2="${X(k)}" y2="${mt+ph}" stroke="var(--line)" stroke-width="1"/><text x="${X(k)}" y="${mt+ph+16}" text-anchor="middle">${k}</text>`}
+  for(let g=0;g<=175;g+=25){s+=`<line x1="${ml}" y1="${Y(g)}" x2="${ml+pw}" y2="${Y(g)}" stroke="var(--line)" stroke-width="1"/><text x="${ml-8}" y="${Y(g)+4}" text-anchor="end">${g}</text>`}
+  s+=`<rect x="${X(40)}" y="${Y(175)}" width="${X(75)-X(40)}" height="${Y(50)-Y(175)}" fill="var(--zone)" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  s+=`<text x="${X(75)-5}" y="${Y(175)+14}" text-anchor="end" style="fill:var(--accent)">SCA zone</text>`;
+  s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(95)}" y2="${Y(190)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 4"/><text x="${X(88)}" y="${Y(184)}" text-anchor="end">2:1</text>`;
+  s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(100)}" y2="${Y(100)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 4"/><text x="${X(99)}" y="${Y(100)+14}" text-anchor="end">1:1</text>`;
+  s+=`<text x="${ml+pw/2}" y="${H-6}" text-anchor="middle">alkalinity (KH) → more buffer, less acidity</text>`;
+  s+=`<text transform="translate(12 ${mt+ph/2}) rotate(-90)" text-anchor="middle">hardness (GH) → more extraction, body</text>`;
+  R.forEach(r=>{
+    const on=r.id===state.sel, col=r.use==='espresso'?'var(--k)':'var(--accent)';
+    s+=`<g class="dot" data-id="${r.id}" tabindex="0" role="button" aria-label="${esc(r.name)}"><circle cx="${X(r.kh)}" cy="${Y(r.gh)}" r="12" fill="transparent"/><circle cx="${X(r.kh)}" cy="${Y(r.gh)}" r="${on?7:5}" fill="${col}" stroke="var(--surface)" stroke-width="${on?0:1.5}"/>${on?`<circle cx="${X(r.kh)}" cy="${Y(r.gh)}" r="11" fill="none" stroke="${col}" stroke-width="1.5"/>`:''}<title>${esc(r.name)} · GH ${r.gh} / KH ${r.kh}</title></g>`;
+  });
+  const sel=R.find(r=>r.id===state.sel);
+  if(sel){const tx=X(sel.kh), right=tx<ml+pw*0.6; s+=`<text x="${tx+(right?15:-15)}" y="${Y(sel.gh)+4}" text-anchor="${right?'start':'end'}" style="fill:var(--fg);font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:4px">${esc(sel.name)}</text>`}
+  const cx=X(state.kh), cy=Y(state.gh);
+  s+=`<g pointer-events="none" stroke="var(--fg)" stroke-width="2"><line x1="${cx-9}" y1="${cy}" x2="${cx+9}" y2="${cy}"/><line x1="${cx}" y1="${cy-9}" x2="${cx}" y2="${cy+9}"/></g>`;
+  $('map').innerHTML=s;
+}
+function selCard(){
+  const r=R.find(x=>x.id===state.sel);
+  $('selcard').innerHTML=r?`<div><b>${esc(r.name)}</b> <span class="num">· GH ${r.gh} / KH ${r.kh}</span></div><div class="who">${esc(r.by)}</div><div>${esc(r.note)}</div><div class="num" style="font-size:.8rem;color:var(--muted)">${esc(r.how)}</div>`
+   :`<div><b>Custom target</b> <span class="num">· GH ${n(state.gh,0)} / KH ${n(state.kh,0)}</span></div><div class="who">Click a dot to compare with a published recipe.</div>`;
+}
+function pick(id,scroll){
+  const r=R.find(x=>x.id===id); if(!r)return;
+  state.sel=id; $('in-gh').value=r.gh; $('in-kh').value=r.kh; $('in-kshare').value=Math.round(r.k/5)*5; $('in-ca').value=r.ca||0; $('in-mgcl').value=r.mc||0;
+  calc(); selCard();
+  if(scroll)$('bench').scrollIntoView();
+}
+$('map').addEventListener('click',e=>{
+  const g=e.target.closest('.dot');
+  if(g){pick(g.dataset.id);return}
+  const b=$('map').getBoundingClientRect();
+  const px=(e.clientX-b.left)/b.width*W, py=(e.clientY-b.top)/b.height*H;
+  if(px<ml||px>ml+pw||py<mt||py>mt+ph)return;
+  state.sel=null;
+  $('in-kh').value=Math.round((px-ml)/pw*XM); $('in-gh').value=Math.round((mt+ph-py)/ph*YM);
+  calc(); selCard();
+});
+$('map').addEventListener('keydown',e=>{const g=e.target.closest('.dot');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.id)}});
+['in-gh','in-kh'].forEach(id=>$(id).addEventListener('input',()=>{state.sel=null;calc();selCard()}));
+['in-vol','in-kshare','in-ca','in-mgcl'].forEach(id=>$(id).addEventListener('input',calc));
+$('kit').addEventListener('input',()=>{
+  KIT.forEach(b=>{b.on=$('kit-on-'+b.id).checked?1:0;const v=+$('kit-s-'+b.id).value;if(v>0)b.s=v});
+  setForm($('kit-form').value); kitLabel(); save(); calc(); drawRecipes();
+});
+
+/* ---------- tiles ---------- */
+const tile=t=>`<div class="tile" style="--c:var(${t.c})"><div class="top"><div><div class="sym">${t.sym}</div><b>${t.name}</b></div><span>${esc(t.from)}</span></div><dl><div><dt>Does</dt><dd>${esc(t.does)}</dd></div><div><dt>In the cup</dt><dd>${esc(t.taste)}</dd></div><div><dt>Too much</dt><dd>${esc(t.much)}</dd></div><div><dt>In a machine</dt><dd>${esc(t.mach)}</dd></div></dl></div>`;
+$('cations').innerHTML=CAT.map(tile).join('');
+$('anions').innerHTML=AN.map(tile).join('');
+
+/* ---------- recipes ---------- */
+const F=[['all','All'],['filter','Filter'],['espresso','Espresso'],['safe','Boiler-friendly'],['kit','Exact with my kit']];
+function drawRecipes(){
+  $('rfilter').innerHTML=F.map(f=>`<button class="chip" data-f="${f[0]}" aria-pressed="${state.filter===f[0]}">${f[1]}</button>`).join('');
+  const list=R.filter(r=>state.filter==='all'||(state.filter==='safe'?r.safe:state.filter==='kit'?!missing(r).length:r.use===state.filter));
+  $('rlist').innerHTML=list.map(r=>{
+    const cl=r.clGH*0.708;
+    return `<div class="rc"><div><b>${esc(r.name)}</b><div style="color:var(--muted);font-size:.8rem">${esc(r.by)}</div></div>
+    <div class="gk"><div><span>GH</span><b>${r.gh}</b></div><div><span>KH</span><b>${r.kh}</b></div><div><span>RATIO</span><b>${r.kh?n(r.gh/r.kh)+':1':'–'}</b></div><div><span>TDS PEN</span><b>≈${n(pen(r),0)}</b></div></div>
+    <div>${esc(r.note)}</div><div class="how">${esc(r.how)}</div>
+    <div class="tags"><span class="tag">${r.use}</span>${r.safe?'<span class="tag safe">no Ca, no Cl</span>':`<span class="tag cl">chloride ≈ ${n(cl,0)} mg/L</span>`}${missing(r).length?`<span class="tag cl">missing: ${missing(r).join(', ')}</span>`:'<span class="tag safe">exact with your bottles</span>'}</div>
+    <button class="btn" data-load="${r.id}">Load in mixer</button></div>`}).join('');
+}
+$('rfilter').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b){state.filter=b.dataset.f;drawRecipes()}});
+$('rlist').addEventListener('click',e=>{const b=e.target.closest('[data-load]');if(b)pick(b.dataset.load,true)});
+
+$('pairs').innerHTML=PAIRS.map(p=>`<tr><td><b>${esc(p[0])}</b></td><td class="num">${p[1]}</td><td class="num">${p[2]}</td><td>${esc(p[3])}</td><td>${esc(p[4])}</td><td><span class="ev ${p[5]}">${EV[p[5]]}</span><br><span style="font-size:.78rem;color:var(--muted)">${esc(p[6])}</span></td></tr>`).join('');
+
+/* ---------- taste sliders + start buttons ---------- */
+$('in-tk').addEventListener('input',e=>{state.sel=null;$('in-kh').value=e.target.value;calc();selCard()});
+$('in-tg').addEventListener('input',e=>{state.sel=null;$('in-gh').value=e.target.value;calc();selCard()});
+$('start').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  if(b.dataset.go)pick(b.dataset.go,true);
+  else if(b.dataset.kh){state.sel=null;$('in-gh').value=80;$('in-kh').value=b.dataset.kh;calc();selCard();$('bench').scrollIntoView()}
+});
+
+/* ---------- concentrate builder ---------- */
+$('b-salt').innerHTML=SALTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+function build(){
+  const s=SALTS.find(x=>x.id===$('b-salt').value), g=Math.max(0,+$('b-g').value||0), ml=Math.max(1,+$('b-ml').value||1);
+  const str=g/ml*1000, per=str*s.ppm/1000, dose=per>0?s.ref/per:0;
+  const row=(l,sub,v)=>`<div class="out-row"><div>${l}<small>${sub}</small></div><b>${v}</b></div>`;
+  $('b-out').innerHTML=
+    row('Strength','grams of salt per litre of concentrate',n(str,str<10?2:1)+' g/L')+
+    row('1 g of concentrate in 1 L adds','ppm as CaCO₃',n(per,per<10?1:0)+' '+s.adds)+
+    row(`Dose for ${s.ref} ${s.adds}`,'grams of concentrate per litre of brew water',per>0?n(dose,dose<10?2:1)+' g':'–')+
+    row('This bottle makes','litres of brew water at that dose',dose>0?n(ml/dose,0)+' L':'–');
+  const v=[];
+  if(str>s.sol)v.push(['bad','That is more than dissolves at room temperature (about '+s.sol+' g/L). Use less salt or more water.']);
+  else if(str>s.sol*0.7)v.push(['warn','Close to the solubility limit of about '+s.sol+' g/L. It may crystallize in the fridge.']);
+  if(dose>0&&dose<1)v.push(['warn','Doses under 1 g are hard to weigh accurately. A weaker concentrate is easier to use.']);
+  if(dose>60)v.push(['warn','You would pour more than 60 g per litre. A stronger concentrate saves space.']);
+  if(s.id.includes('cl'))v.push(['warn','Chloride salt: for filter water only, not for an espresso machine.']);
+  if(!v.length)v.push(['good','Dissolves easily and doses in a comfortable range.']);
+  $('b-note').innerHTML=v.map(x=>`<div class="${x[0]}">${x[1]}</div>`).join('');
+  $('b-use').hidden=!(str>0);
+}
+['b-salt','b-g','b-ml'].forEach(id=>$(id).addEventListener('input',build));
+$('b-use').addEventListener('click',()=>{
+  const s=SALTS.find(x=>x.id===$('b-salt').value), b=K(MIX[s.id]);
+  b.s=+n(+$('b-g').value/(+$('b-ml').value)*1000,2); b.on=1;
+  if(b.id==='cacl')setForm(s.id==='cacl2h'?'di':'anh');
+  save(); renderKit(); calc(); drawRecipes(); $('mixer').scrollIntoView();
+});
+
+load(); renderKit(); drawRecipes(); pick('bh'); build();
+})();
+</script>
+</body>
+</html>
