@@ -6,6 +6,8 @@
 <meta name="description" content="Coffee water reference: what each mineral does, published recipes on a GH/KH map, and a mixer for your own mineral concentrates.">
 <style>:root{color-scheme:light}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Brew Water Bench</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0d3a45">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: a lab bench. Map + mixer up top as the working surface, reference shelves below.
@@ -13,6 +15,7 @@
 :root{
   --bg:#edf2f3; --surface:#f8fbfb; --sunk:#e1e9eb; --line:#c5d2d6; --fg:#12242b; --muted:#506870;
   --accent:#0b6e83; --accent-fg:#ffffff; --zone:#0b6e8322;
+  --deep:#0d3a45; --deep-fg:#eef7f8; --deep-muted:#a9cbd1;
   --mg:#3d7fa6; --ca:#b4532f; --na:#a56a00; --k:#7d55b0; --hco3:#1f7f63; --cl:#6c7d12; --so4:#96790a;
   --good:#1f7f63; --warn:#a56a00; --bad:#b03a3a;
   --f-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
@@ -21,12 +24,12 @@
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0d171b; --surface:#142228; --sunk:#0a1215; --line:#2a3d45; --fg:#e2edef; --muted:#93aab1;
-  --accent:#5cc3d6; --accent-fg:#06222a; --zone:#5cc3d626;
+  --accent:#5cc3d6; --accent-fg:#06222a; --zone:#5cc3d626; --deep:#0a2a32;
   --mg:#8cc4e6; --ca:#e98a66; --na:#e6ad3c; --k:#b999e6; --hco3:#5fcaa6; --cl:#b5c94c; --so4:#dcc04a;
   --good:#5fcaa6; --warn:#e6ad3c; --bad:#ef8080; color-scheme:dark } }
 :root[data-theme="dark"]{
   --bg:#0d171b; --surface:#142228; --sunk:#0a1215; --line:#2a3d45; --fg:#e2edef; --muted:#93aab1;
-  --accent:#5cc3d6; --accent-fg:#06222a; --zone:#5cc3d626;
+  --accent:#5cc3d6; --accent-fg:#06222a; --zone:#5cc3d626; --deep:#0a2a32;
   --mg:#8cc4e6; --ca:#e98a66; --na:#e6ad3c; --k:#b999e6; --hco3:#5fcaa6; --cl:#b5c94c; --so4:#dcc04a;
   --good:#5fcaa6; --warn:#e6ad3c; --bad:#ef8080; color-scheme:dark }
 
@@ -37,26 +40,40 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 a{color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
-h1{font-size:clamp(2.1rem,5.5vw,3.5rem);font-weight:700;letter-spacing:-.02em}
-h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,4.1rem);font-weight:700;letter-spacing:-.025em;line-height:1.02}
+h2{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:700;letter-spacing:-.015em}
 h3{font-size:1.1rem;font-weight:700}
 p{margin:0}
 .lede{max-width:62ch;color:var(--muted);font-size:1.05rem}
 .prose{display:flex;flex-direction:column;gap:.8rem;max-width:68ch}
-.label{font:500 .72rem/1.2 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.label{font:500 .8rem/1.3 var(--f-body);color:var(--muted)}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 sub,sup{font-size:.7em;line-height:0}
 
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;gap:1.1rem;overflow-x:auto;padding-block:.6rem;scrollbar-width:none}
-nav a{font:500 .8rem var(--f-mono);color:var(--muted);text-decoration:none;white-space:nowrap}
+nav .wrap{display:flex;align-items:center;gap:.15rem;overflow-x:auto;padding-block:.45rem;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav a{font:500 .86rem var(--f-body);color:var(--muted);text-decoration:none;white-space:nowrap;padding:.32rem .6rem;border-radius:99px}
 nav a:hover{color:var(--fg)}
-nav .brand{color:var(--fg);font-weight:600}
+nav a[aria-current="true"]{background:var(--deep);color:var(--deep-fg)}
+nav .brand{display:flex;align-items:center;gap:.4rem;color:var(--fg);font:700 1rem var(--f-display);padding-left:0;margin-right:.5rem}
+nav .brand svg{width:1.05rem;height:1.05rem;fill:var(--accent)}
+nav .prog{position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
 
-header.hero{padding-block:2.6rem 1.6rem}
-header.hero .wrap{display:flex;flex-direction:column;gap:1rem}
-section{padding-block:2.4rem;border-top:1px solid var(--line)}
-section>.wrap{display:flex;flex-direction:column;gap:1.3rem}
+header.hero{background:var(--deep);color:var(--deep-fg)}
+header.hero .wrap{display:flex;flex-direction:column;gap:1.2rem;padding-block:3.4rem 2.4rem}
+header.hero h1{max-width:17ch}
+header.hero .lede{color:var(--deep-muted);max-width:58ch}
+.ionstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.ionstrip a{background:var(--c);color:var(--surface);text-decoration:none;padding:.55rem .7rem;font:700 1.05rem var(--f-display);display:flex;flex-direction:column;gap:.05rem;min-width:0}
+.ionstrip a span{font:500 .74rem var(--f-body);opacity:.92;overflow:hidden;text-overflow:ellipsis}
+.ionstrip a:hover{filter:brightness(1.08)}
+@media (max-width:640px){.ionstrip a{padding:.45rem .35rem;font-size:.82rem;align-items:center}.ionstrip a span{display:none}}
+section{padding-block:3.4rem}
+section + section{border-top:1px solid var(--line)}
+#bench{background:var(--sunk);border-block:1px solid var(--line)}
+#bench + section{border-top:0}
+section>.wrap{display:flex;flex-direction:column;gap:1.5rem}
 .sec-head{display:flex;flex-direction:column;gap:.5rem}
 
 .bench{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1.2rem;align-items:start}
@@ -103,7 +120,7 @@ details .fields{margin-top:.7rem;grid-template-columns:repeat(3,minmax(0,1fr))}
 .tile .top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
 .tile .top span{font:.72rem var(--f-mono);color:var(--muted);text-align:right}
 .tile dl{margin:0;display:flex;flex-direction:column;gap:.45rem}
-.tile dt{font:500 .68rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile dt{font:600 .76rem var(--f-body);color:var(--muted)}
 .tile dd{margin:0}
 
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem}
@@ -118,21 +135,22 @@ details .fields{margin-top:.7rem;grid-template-columns:repeat(3,minmax(0,1fr))}
 .rc{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.85rem;display:flex;flex-direction:column;gap:.5rem;font-size:.88rem}
 .rc .gk{display:flex;gap:.3rem .8rem;flex-wrap:wrap;font-family:var(--f-mono)}
 .rc .gk b{font-size:1.25rem;font-variant-numeric:tabular-nums}
-.rc .gk span{display:block;font-size:.66rem;letter-spacing:.08em;color:var(--muted)}
+.rc .gk span{display:block;font:500 .72rem var(--f-body);color:var(--muted)}
 .rc .how{font:.78rem/1.45 var(--f-mono);color:var(--muted)}
 .rc .tags{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:auto}
-.tag{font:500 .66rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:.12rem .4rem;border-radius:3px;background:var(--sunk);color:var(--muted)}
+.tag{font:500 .74rem var(--f-body);padding:.12rem .45rem;border-radius:3px;background:var(--sunk);color:var(--muted)}
 .tag.safe{color:var(--good)} .tag.cl{color:var(--warn)}
-.btn{font:600 .8rem var(--f-mono);padding:.4rem .7rem;border-radius:4px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;align-self:flex-start}
-.btn:hover{background:var(--accent);color:var(--accent-fg)}
+.btn{font:600 .86rem var(--f-body);padding:.45rem .85rem;border-radius:99px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;align-self:flex-start}
+.btn:hover,.btn.pri{background:var(--accent);color:var(--accent-fg)}
+.btn.pri:hover{filter:brightness(1.1)}
 
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
 table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:680px}
-th{font:500 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font:600 .8rem var(--f-body);color:var(--muted);text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:.65rem .75rem;border-top:1px solid var(--line);vertical-align:top}
 tr:first-child td{border-top:0}
 td.num{white-space:nowrap}
-.ev{font:500 .66rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.ev{font:600 .78rem var(--f-body);white-space:nowrap}
 .ev.a{color:var(--good)} .ev.b{color:var(--warn)} .ev.c{color:var(--muted)}
 ol.steps{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:.4rem}
 ul.plain{margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:.4rem}
@@ -140,11 +158,13 @@ ul.plain{margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:.4r
 .sources li{break-inside:avoid;margin-bottom:.45rem}
 footer{padding-block:1.5rem 3rem;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line)}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
-section,header,#builder{scroll-margin-top:3rem}
+section,header,#builder{scroll-margin-top:3.4rem}
 .steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;counter-reset:st}
 @media (max-width:760px){.steps3{grid-template-columns:minmax(0,1fr)}}
-.step{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1rem;display:flex;flex-direction:column;gap:.55rem;font-size:.93rem;counter-increment:st}
-.step h3::before{content:counter(st) ". ";color:var(--accent)}
+.steps3{gap:1.6rem}
+.step{border-top:2px solid var(--fg);padding-top:.8rem;display:flex;flex-direction:column;gap:.6rem;font-size:.95rem;counter-increment:st}
+.step::before{content:counter(st);font:700 2.6rem/1 var(--f-display);color:var(--accent)}
+.step h3{font-size:1.25rem}
 .step .acts{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:auto}
 .tastebox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;background:var(--sunk);border-radius:4px;padding:.7rem}
 @media (max-width:480px){.tastebox{grid-template-columns:minmax(0,1fr)}}
@@ -164,15 +184,23 @@ select{width:100%;font:500 .95rem var(--f-body);padding:.5rem .55rem;background:
 </head>
 <body>
 
-<nav><div class="wrap">
-  <a class="brand" href="#top">Brew Water Bench</a>
+<nav><div class="wrap" id="navlinks">
+  <a class="brand" href="#top"><svg viewBox="0 0 32 40" aria-hidden="true"><path d="M16 0C7.5 12.5 0 21 0 30.5a16 16 0 0 0 32 0C32 21 24.5 12.5 16 0z"/></svg>Brew Water Bench</a>
   <a href="#start">Start</a><a href="#bench">Map + mixer</a><a href="#minerals">Minerals</a><a href="#together">How it fits</a><a href="#recipes">Recipes</a><a href="#pairing">By coffee</a><a href="#machine">Espresso machine</a><a href="#taste">Dial in by taste</a><a href="#products">Products</a><a href="#sources">Sources</a>
-</div></nav>
+</div><div class="prog" id="prog"></div></nav>
 
 <header class="hero" id="top"><div class="wrap">
-  <span class="label">Water for coffee, in ppm as CaCO<sub>3</sub></span>
   <h1>Two numbers run your cup: hardness pulls flavor out, alkalinity mutes acid.</h1>
   <p class="lede">A working reference for building coffee water from distilled or RO: what each mineral does, published recipes on one map, and a mixer that works with whichever mineral bottles you own. Where the evidence is thin or people disagree, it says so.</p>
+</div>
+<div class="ionstrip">
+  <a href="#minerals" style="--c:var(--mg)">Mg²⁺<span>magnesium</span></a>
+  <a href="#minerals" style="--c:var(--ca)">Ca²⁺<span>calcium</span></a>
+  <a href="#minerals" style="--c:var(--na)">Na⁺<span>sodium</span></a>
+  <a href="#minerals" style="--c:var(--k)">K⁺<span>potassium</span></a>
+  <a href="#minerals" style="--c:var(--hco3)">HCO₃⁻<span>bicarbonate</span></a>
+  <a href="#minerals" style="--c:var(--cl)">Cl⁻<span>chloride</span></a>
+  <a href="#minerals" style="--c:var(--so4)">SO₄²⁻<span>sulfate</span></a>
 </div></header>
 
 <section id="start"><div class="wrap">
@@ -189,7 +217,7 @@ select{width:100%;font:500 .95rem var(--f-body);padding:.5rem .55rem;background:
     <div class="step">
       <h3>Mix a litre of 80 / 40</h3>
       <p>Weigh 19.7 g from the Epsom bottle and 6.7 g from the baking soda bottle, then top up to 1 kg with distilled water. Hardness 80 does the extracting. Alkalinity 40 keeps the acidity in check.</p>
-      <div class="acts"><button class="btn" data-go="bh">Load 80 / 40</button></div>
+      <div class="acts"><button class="btn pri" data-go="bh">Load 80 / 40</button></div>
     </div>
     <div class="step">
       <h3>Change one number and taste</h3>
@@ -257,7 +285,7 @@ select{width:100%;font:500 .95rem var(--f-body);padding:.5rem .55rem;background:
     </div>
     <div class="out" id="b-out"></div>
     <div class="verdicts" id="b-note"></div>
-    <button class="btn" id="b-use">Use this strength in the mixer</button>
+    <button class="btn pri" id="b-use">Use this strength in the mixer</button>
   </div>
 </div></section>
 
@@ -617,6 +645,8 @@ function drawMap(){
   s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(100)}" y2="${Y(100)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 4"/><text x="${X(99)}" y="${Y(100)+14}" text-anchor="end">1:1</text>`;
   s+=`<text x="${ml+pw/2}" y="${H-6}" text-anchor="middle">alkalinity (KH) → more buffer, less acidity</text>`;
   s+=`<text transform="translate(12 ${mt+ph/2}) rotate(-90)" text-anchor="middle">hardness (GH) → more extraction, body</text>`;
+  const hint='style="font-family:var(--f-display);font-size:13px;font-weight:700;opacity:.55"';
+  s+=`<text x="${X(2)}" y="${Y(130)}" ${hint}>sharper</text><text x="${X(98)}" y="${Y(28)}" text-anchor="end" ${hint}>flatter</text><text x="${X(14)}" y="${Y(181)}" ${hint}>heavier</text><text x="${X(70)}" y="${Y(7)}" ${hint}>thinner</text>`;
   R.forEach(r=>{
     const on=r.id===state.sel, col=r.use==='espresso'?'var(--k)':'var(--accent)';
     s+=`<g class="dot" data-id="${r.id}" tabindex="0" role="button" aria-label="${esc(r.name)}"><circle cx="${X(r.kh)}" cy="${Y(r.gh)}" r="12" fill="transparent"/><circle cx="${X(r.kh)}" cy="${Y(r.gh)}" r="${on?7:5}" fill="${col}" stroke="var(--surface)" stroke-width="${on?0:1.5}"/>${on?`<circle cx="${X(r.kh)}" cy="${Y(r.gh)}" r="11" fill="none" stroke="${col}" stroke-width="1.5"/>`:''}<title>${esc(r.name)} · GH ${r.gh} / KH ${r.kh}</title></g>`;
@@ -669,7 +699,7 @@ function drawRecipes(){
   $('rlist').innerHTML=list.map(r=>{
     const cl=r.clGH*0.708;
     return `<div class="rc"><div><b>${esc(r.name)}</b><div style="color:var(--muted);font-size:.8rem">${esc(r.by)}</div></div>
-    <div class="gk"><div><span>GH</span><b>${r.gh}</b></div><div><span>KH</span><b>${r.kh}</b></div><div><span>RATIO</span><b>${r.kh?n(r.gh/r.kh)+':1':'–'}</b></div><div><span>TDS PEN</span><b>≈${n(pen(r),0)}</b></div></div>
+    <div class="gk"><div><span>GH</span><b>${r.gh}</b></div><div><span>KH</span><b>${r.kh}</b></div><div><span>Ratio</span><b>${r.kh?n(r.gh/r.kh)+':1':'–'}</b></div><div><span>TDS pen</span><b>≈${n(pen(r),0)}</b></div></div>
     <div>${esc(r.note)}</div><div class="how">${esc(r.how)}</div>
     <div class="tags"><span class="tag">${r.use}</span>${r.safe?'<span class="tag safe">no Ca, no Cl</span>':`<span class="tag cl">chloride ≈ ${n(cl,0)} mg/L</span>`}${missing(r).length?`<span class="tag cl">missing: ${missing(r).join(', ')}</span>`:'<span class="tag safe">exact with your bottles</span>'}</div>
     <button class="btn" data-load="${r.id}">Load in mixer</button></div>`}).join('');
@@ -717,7 +747,26 @@ $('b-use').addEventListener('click',()=>{
   save(); renderKit(); calc(); drawRecipes(); $('mixer').scrollIntoView();
 });
 
-load(); renderKit(); drawRecipes(); pick('bh'); build();
+/* ---------- top bar: current section + reading progress ---------- */
+const navBox=$('navlinks'), navLinks=[...navBox.querySelectorAll('a[href^="#"]:not(.brand)')];
+const spots=navLinks.map(a=>document.getElementById(a.getAttribute('href').slice(1)));
+let curNav=-1, ticking=false;
+function spy(){
+  ticking=false;
+  const line=window.innerHeight*0.3;
+  let i=-1; spots.forEach((el,k)=>{if(el.getBoundingClientRect().top<=line)i=k});
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  if(max>0&&window.scrollY>=max-4)i=spots.length-1;
+  $('prog').style.transform='scaleX('+(max>0?Math.min(1,window.scrollY/max):0)+')';
+  if(i===curNav)return; curNav=i;
+  navLinks.forEach((a,k)=>{if(k===i)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current')});
+  if(i>=0){const a=navLinks[i];navBox.scrollTo({left:a.offsetLeft-navBox.clientWidth/2+a.offsetWidth/2,behavior:'smooth'})}
+  else navBox.scrollTo({left:0,behavior:'smooth'});
+}
+window.addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(spy)}},{passive:true});
+window.addEventListener('resize',spy);
+
+load(); renderKit(); drawRecipes(); pick('bh'); build(); spy();
 })();
 </script>
 </body>
